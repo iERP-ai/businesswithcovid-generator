@@ -85,7 +85,7 @@ def main():
         print(df[s].values)
 
     df['cbf'] = df[weights.keys()].sum(axis=1) / 10
-    print(df[['cbf', 'CountryName', 'Date']])
+    print(df[['cbf', 'CountryName', 'Date'] + list(weights.keys())])
 
     return
 
@@ -100,12 +100,6 @@ def factors2values2(series, col1, col2):
         return 0
     elif int(series[col1]) == 0 and int(series[col2]) == 1:
         return 0
-    else:
-        print(series)
-        print('func2')
-        print(series[col1])
-        print(series[col2])
-        exit()
 
 
 def factors2values3(series, col1, col2):
@@ -122,12 +116,6 @@ def factors2values3(series, col1, col2):
         return 0
     elif int(series[col1]) == 0 and int(series[col2]) == 1:
         return 0
-    else:
-        print(series)
-        print('func3')
-        print(series[col1])
-        print(series[col2])
-        exit()
 
 
 def factors1values4(series, col1):
@@ -140,12 +128,7 @@ def factors1values4(series, col1):
         return 3
     elif int(series[col1]) == 0:
         return 0
-    else:
-        print(series)
-        print('func4')
-        print(series[col1])
-        print(series[col2])
-        exit()
+
 
 
 def func12(series, col1):
@@ -158,11 +141,6 @@ def func12(series, col1):
         return 7
     elif int(series[col1]) == 0:
         return 10
-    else:
-        print('func12')
-        print(series[col1])
-        print(series[col2])
-        exit()
 
 
 def func13(series, col1):
@@ -173,11 +151,6 @@ def func13(series, col1):
         return 6
     elif int(series[col1]) == 0:
         return 10
-    else:
-        print('func13')
-        print(series[col1])
-        print(series[col2])
-        exit()
 
 
 def tmp_download():
