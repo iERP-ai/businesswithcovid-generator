@@ -307,7 +307,7 @@ def do_json_per_country(country, alpha3, df_stringency):
         df_stringency['iERPScoreB'], df_stringency['Date'],
         ):
         d['graphs']['iERPScoreB']['forecast'].append(
-            {'d': '"' + dateISO + '"', 'iERPScoreB': scorePredicted})
+            {'d': '"' + dateISO + '"', 'iERPScoreB': round(scorePredicted, 3)})
 
     d['graphs']['cases']['prediction'] = []
     for cases, dateISO in predict_cases(
@@ -315,7 +315,7 @@ def do_json_per_country(country, alpha3, df_stringency):
         df_stringency['Date'][-4:],
         ):
         d['graphs']['cases']['prediction'].append(
-            {'d': '"' + dateISO + '"', 'cases': cases})
+            {'d': '"' + dateISO + '"', 'cases': int(cases)})
 
     for Date, iERPScoreB, cases, deaths in zip(
         df_stringency['Date'],
