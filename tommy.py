@@ -97,23 +97,32 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
 
     d['topCountriesByGDP'] = {}
     d['map'] = {}
-    for CountryCode in ('USA', 'CHN', 'JPN', 'DEU', 'IND'):
+
+    for CountryCode in df_stringency['CountryCode'].unique():
+
+        # Skip Aruba (Netherlands), Bermuda (UK), Hong Kong (China), Lesotho, Macau (China), Puerto Rico (US)
+        if not CountryCode in d_alpha2name.keys():
+            continue
+
         df = df_stringency[df_stringency['CountryCode'] == CountryCode][['Date', 'iERPScoreB']].tail(8)
-        _ = float(df.head(1)['iERPScoreB']) - float(df.tail(1)['iERPScoreB'])
-        if _ > 0:
-            icon = 'FallOutlined'
-            color = '#444'
-        elif _ < 0:
-            icon = 'RiseOutlined'
-            color = '#000'
-        else:
-            icon = 'MinusOutlined'
-            color = '#000'
-        d['topCountriesByGDP'][CountryCode] = {
-            'iERPScoreB': float(df.tail(1)['iERPScoreB']),
-            'icon': icon,
-            'color': color,
-            }
+
+        if CountryCode in ('USA', 'CHN', 'JPN', 'DEU', 'IND'):
+            _ = float(df.head(1)['iERPScoreB']) - float(df.tail(1)['iERPScoreB'])
+            if _ > 0:
+                icon = 'FallOutlined'
+                color = '#444'
+            elif _ < 0:
+                icon = 'RiseOutlined'
+                color = '#000'
+            else:
+                icon = 'MinusOutlined'
+                color = '#000'
+            d['topCountriesByGDP'][CountryCode] = {
+                'iERPScoreB': float(df.tail(1)['iERPScoreB']),
+                'icon': icon,
+                'color': color,
+                }
+
         countryName = d_alpha2name[CountryCode]
         d['map'][CountryCode] = {
             'iERPScoreB': float(df.tail(1)['iERPScoreB']),
