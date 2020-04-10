@@ -427,7 +427,7 @@ def limitations_translation(column, value):
         'S5': 'UsergroupAddOutlined',
         'S6': 'CarOutlined',
         'S7': 'CarOutlined',
-        'S12': 'Testing framework',
+        'S12': 'BugOutlined',
         'S13': 'ContactsOutlined',
         }
 
