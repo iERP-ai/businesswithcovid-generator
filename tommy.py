@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
 import pandas as pd
 import pycountry
 import iso3166
 import json
 from datetime import datetime
+from datetime import timedelta  
 
 
 def main():
@@ -125,13 +128,38 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
     return
 
 
+def predict_cases(cases, dates):    
+    s = pd.Series(cases)
+
+    change = s.pct_change(periods=3).tail(1).iat[0]
+    lastValue = cases.tail(1).iat[0]
+    lastDate = dates.tail(1).iat[0]
+    reduction = change/100*3
+
+    predictions = []
+
+    if (lastValue<30):
+        for x in range(0, 21):
+            dateISO = (datetime.strptime(str(lastDate), '%Y%m%d') + timedelta(days=x)).strftime('%Y-%m-%d')
+            predictions.append ([lastValue, dateISO])
+            lastDate = lastDate + 1
+
+    else:
+        for x in range(0, 21):
+            dateISO = (datetime.strptime(str(lastDate), '%Y%m%d') + timedelta(days=x)).strftime('%Y-%m-%d')
+            predictions.append ([lastValue, dateISO])
+
+            change = change - reduction
+            lastValue = lastValue + (lastValue*change)
+
+    return predictions
+
 def do_json_per_country(country, alpha3, df_stringency):
 
     d = {}
     d['limitations'] = []
 
     for column in ('S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S12', 'S13'):
-        print(country, column)
         value = float(df_stringency[column].tail(1) / 10)
         name, value, icon, colorB, colorT = limitations_translation(column, value)
         d['limitations'].append({
@@ -149,6 +177,12 @@ def do_json_per_country(country, alpha3, df_stringency):
         'cases': {'history': []},
         'deaths': {'history': []},
         }
+    
+    d['graphs']['cases']['prediction'] = []
+    for cases, dateISO in predict_cases (df_stringency['ConfirmedCases'][-4:], df_stringency['Date'][-4:]):
+        d['graphs']['cases']['prediction'].append(
+            { 'd': dateISO, 'cases': cases})
+
     for Date, iERPScoreB, cases, deaths in zip(
         df_stringency['Date'],
         df_stringency['iERPScoreB'],
@@ -159,11 +193,11 @@ def do_json_per_country(country, alpha3, df_stringency):
         d['graphs']['iERPScoreB']['history'].append(
             {'d': dateISO, 'iERPScoreB': iERPScoreB})
         d['graphs']['cases']['history'].append(
-            {'d': dateISO, 'cases': deaths})
+            {'d': dateISO, 'cases': cases})
         d['graphs']['deaths']['history'].append(
             {'d': dateISO, 'deaths': deaths})
 
-    with open('country-data-{}.txt'.format(alpha3), 'w') as f:
+    with open('country-data-{}.json'.format(alpha3), 'w') as f:
         json.dump(d, f, indent=4)
 
     return
@@ -185,6 +219,31 @@ def limitations_translation(column, value):
         'S12': 'Testing framework',
         'S13': 'Contact tracing',
     }
+
+    '''
+    d_values = {
+        'S1': { 10: 'All schools closed in whole country', 7.5: 'All schools recommended to be closed in whole country', 5: 'Schools closed in some regions', 2.5: 'Schools recommended to be closed in some regions', 0: 'All schools open' },
+        'S2': { 10: 'Workplaces require closing in whole country', 7.5: 'Workplaces recommended to be closed in whole country', 5: 'Workplaces require closing in some regions', 2.5: 'Workplaces recommended to be closed in some regions', 0: 'No restrictions on workplaces closing' },
+        'S3': { 10: 'Public events cancelled in whole country', 7.5: 'Public events recommended to be cancelled in whole country', 5: 'Public events cancelled in some regions', 2.5: 'Public events recommended to be cancelled in some regions', 0: 'No restrictions on Public events' },
+        'S4': { 10: 'Public transportation closed in whole country', 7.5: 'Public transportation recommended to be closed in whole country', 5: 'Public transportation closed in some regions', 2.5: 'Public transportation recommended to be closed in some regions', 0: 'No restrictions on Public transportation' },
+        'S5': { 10: 'COVID-19 public information campaign launched in whole country', 5: 'COVID-19 public information campaign launched in some regions', 0: 'No COVID-19 public information campaign launched' },
+        'S6': { 10: 'Restricted public movement in whole country', 7.5: 'Restricted public movement recommended in whole country', 5: 'Restricted public movement in some regions', 2.5: 'Restricted public movement recommended in some regions', 0: 'No restrictions on public movement' },
+        'S7': { 10: 'Travel ban on high-risk regions', 7: 'Quarantine on travel from high-risk regions', 3: 'Screening on travel from high-risk regions', 0: 'No travel controls' },
+        'S12': { 10: 'No testing policy on COVID-19', 7: 'Selective testing on COVID-19', 4: 'Testing of anyone showing COVID-19 symptoms', 2: 'Open public testing available' },
+        'S13': { 10: 'No contact tracing of COVID-19 infected individuals', 6: 'Limited contact tracing of COVID-19 infected individuals', 2: 'Comprehensive contact tracing of COVID-19 infected individuals for all cases' },
+    }
+
+    d_icons = {
+        'S1': 'ExperimentOutlined',
+        'S2': 'ContactsOutlined',
+        'S3': 'TeamOutlined',
+        'S4': 'SendOutlined',
+        'S5': 'UsergroupAddOutlined',
+        'S6': 'CarOutlined',
+        'S7': 'CarOutlined',
+        'S12': 'Testing framework',
+        'S13': 'ContactsOutlined',
+    } '''
 
     name = d_names[column]
     value = value
