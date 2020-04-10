@@ -1,24 +1,14 @@
 {
     "topCountriesImpacted": {
-        "Ukraine": 9.75,
-        "Pakistan": 9.7,
-        "Malaysia": 9.5,
-        "Venezuela": 9.35,
-        "Mexico": 9.345
+        "UKR": 9.75,
+        "PAK": 9.7,
+        "MYS": 9.5,
+        "VEN": 9.35,
+        "BGD": 9.32
     },
     "topCountriesByGDP": {
-        "USA": {
-            "iERPScoreB": 1.2,
-            "icon": "FallOutlined",
-            "color": "#444"
-        },
         "CHN": {
             "iERPScoreB": 2.54,
-            "icon": "FallOutlined",
-            "color": "#444"
-        },
-        "JPN": {
-            "iERPScoreB": 1.2,
             "icon": "FallOutlined",
             "color": "#444"
         },
@@ -31,14 +21,144 @@
             "iERPScoreB": 9.290000000000001,
             "icon": "MinusOutlined",
             "color": "#000"
+        },
+        "JPN": {
+            "iERPScoreB": 1.2,
+            "icon": "FallOutlined",
+            "color": "#444"
+        },
+        "USA": {
+            "iERPScoreB": 1.2,
+            "icon": "FallOutlined",
+            "color": "#444"
         }
     },
     "map": {
-        "USA": {
+        "AFG": {
+            "iERPScoreB": 3.45,
+            "cases": 444,
+            "deaths": 14,
+            "recoveries": 29
+        },
+        "AGO": {
             "iERPScoreB": 1.2,
-            "cases": 429052,
-            "deaths": 14695,
-            "recoveries": 23559
+            "cases": 19,
+            "deaths": 2,
+            "recoveries": 2
+        },
+        "ARE": {
+            "iERPScoreB": 9.040000000000001,
+            "cases": 2659,
+            "deaths": 12,
+            "recoveries": 239
+        },
+        "ARG": {
+            "iERPScoreB": 7.575,
+            "cases": 1715,
+            "deaths": 63,
+            "recoveries": 358
+        },
+        "AUS": {
+            "iERPScoreB": 6.07,
+            "cases": 6010,
+            "deaths": 50,
+            "recoveries": 1080
+        },
+        "AUT": {
+            "iERPScoreB": 8.575,
+            "cases": 12942,
+            "deaths": 273,
+            "recoveries": 4512
+        },
+        "BDI": {
+            "iERPScoreB": 1.2,
+            "cases": 3,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "BEL": {
+            "iERPScoreB": 2.5,
+            "cases": 23403,
+            "deaths": 2240,
+            "recoveries": 4681
+        },
+        "BFA": {
+            "iERPScoreB": 3.2,
+            "cases": 414,
+            "deaths": 23,
+            "recoveries": 134
+        },
+        "BGD": {
+            "iERPScoreB": 9.32,
+            "cases": 218,
+            "deaths": 20,
+            "recoveries": 33
+        },
+        "BGR": {
+            "iERPScoreB": 8.725,
+            "cases": 593,
+            "deaths": 24,
+            "recoveries": 42
+        },
+        "BHR": {
+            "iERPScoreB": 1.2,
+            "cases": 823,
+            "deaths": 5,
+            "recoveries": 477
+        },
+        "BLZ": {
+            "iERPScoreB": 1.2,
+            "cases": 8,
+            "deaths": 1,
+            "recoveries": 0
+        },
+        "BOL": {
+            "iERPScoreB": 1.2,
+            "cases": 210,
+            "deaths": 15,
+            "recoveries": 2
+        },
+        "BRA": {
+            "iERPScoreB": 2.2,
+            "cases": 16170,
+            "deaths": 819,
+            "recoveries": 127
+        },
+        "BRB": {
+            "iERPScoreB": 6.39,
+            "cases": 63,
+            "deaths": 3,
+            "recoveries": 8
+        },
+        "BRN": {
+            "iERPScoreB": 1.2,
+            "cases": 135,
+            "deaths": 1,
+            "recoveries": 91
+        },
+        "BWA": {
+            "iERPScoreB": 1.2,
+            "cases": 6,
+            "deaths": 1,
+            "recoveries": 0
+        },
+        "CAN": {
+            "iERPScoreB": 1.2,
+            "cases": 19141,
+            "deaths": 407,
+            "recoveries": 4154
+        },
+        "CHE": {
+            "iERPScoreB": 1.2,
+            "cases": 23280,
+            "deaths": 895,
+            "recoveries": 9800
+        },
+        "CHL": {
+            "iERPScoreB": 6.265,
+            "cases": 5546,
+            "deaths": 48,
+            "recoveries": 1115
         },
         "CHN": {
             "iERPScoreB": 2.54,
@@ -46,11 +166,41 @@
             "deaths": 3337,
             "recoveries": 77567
         },
-        "JPN": {
+        "CMR": {
+            "iERPScoreB": 5.45,
+            "cases": 730,
+            "deaths": 10,
+            "recoveries": 60
+        },
+        "COD": {
             "iERPScoreB": 1.2,
-            "cases": 4257,
-            "deaths": 93,
-            "recoveries": 622
+            "cases": 180,
+            "deaths": 18,
+            "recoveries": 9
+        },
+        "COL": {
+            "iERPScoreB": 8.45,
+            "cases": 2054,
+            "deaths": 54,
+            "recoveries": 123
+        },
+        "CRI": {
+            "iERPScoreB": 1.2,
+            "cases": 502,
+            "deaths": 3,
+            "recoveries": 29
+        },
+        "CUB": {
+            "iERPScoreB": 1.2,
+            "cases": 457,
+            "deaths": 12,
+            "recoveries": 27
+        },
+        "CZE": {
+            "iERPScoreB": 2.2,
+            "cases": 5312,
+            "deaths": 99,
+            "recoveries": 233
         },
         "DEU": {
             "iERPScoreB": 4.7,
@@ -58,11 +208,533 @@
             "deaths": 2349,
             "recoveries": 46300
         },
+        "DNK": {
+            "iERPScoreB": 6.945,
+            "cases": 5597,
+            "deaths": 218,
+            "recoveries": 1763
+        },
+        "DOM": {
+            "iERPScoreB": 1.2,
+            "cases": 2111,
+            "deaths": 108,
+            "recoveries": 50
+        },
+        "DZA": {
+            "iERPScoreB": 1.2,
+            "cases": 1572,
+            "deaths": 205,
+            "recoveries": 237
+        },
+        "ECU": {
+            "iERPScoreB": 9.125,
+            "cases": 4450,
+            "deaths": 242,
+            "recoveries": 140
+        },
+        "EGY": {
+            "iERPScoreB": 8.040000000000001,
+            "cases": 1560,
+            "deaths": 103,
+            "recoveries": 305
+        },
+        "ESP": {
+            "iERPScoreB": 3.55,
+            "cases": 148220,
+            "deaths": 14792,
+            "recoveries": 48021
+        },
+        "FIN": {
+            "iERPScoreB": 3.45,
+            "cases": 2487,
+            "deaths": 40,
+            "recoveries": 300
+        },
+        "FRA": {
+            "iERPScoreB": 1.2,
+            "cases": 113959,
+            "deaths": 10887,
+            "recoveries": 21452
+        },
+        "GBR": {
+            "iERPScoreB": 1.2,
+            "cases": 61474,
+            "deaths": 7111,
+            "recoveries": 345
+        },
+        "GHA": {
+            "iERPScoreB": 2.2,
+            "cases": 313,
+            "deaths": 6,
+            "recoveries": 34
+        },
+        "GRC": {
+            "iERPScoreB": 1.2,
+            "cases": 1884,
+            "deaths": 83,
+            "recoveries": 269
+        },
+        "GTM": {
+            "iERPScoreB": 1.2,
+            "cases": 87,
+            "deaths": 3,
+            "recoveries": 17
+        },
+        "GUY": {
+            "iERPScoreB": 8.2,
+            "cases": 37,
+            "deaths": 6,
+            "recoveries": 8
+        },
+        "HND": {
+            "iERPScoreB": 7.55,
+            "cases": 312,
+            "deaths": 22,
+            "recoveries": 6
+        },
+        "HRV": {
+            "iERPScoreB": 4.2,
+            "cases": 1343,
+            "deaths": 19,
+            "recoveries": 179
+        },
+        "HUN": {
+            "iERPScoreB": 1.2,
+            "cases": 895,
+            "deaths": 58,
+            "recoveries": 94
+        },
+        "IDN": {
+            "iERPScoreB": 7.57,
+            "cases": 2956,
+            "deaths": 240,
+            "recoveries": 222
+        },
         "IND": {
             "iERPScoreB": 9.290000000000001,
             "cases": 5916,
             "deaths": 178,
             "recoveries": 506
+        },
+        "IRL": {
+            "iERPScoreB": 1.7,
+            "cases": 6074,
+            "deaths": 235,
+            "recoveries": 25
+        },
+        "IRN": {
+            "iERPScoreB": 1.2,
+            "cases": 64586,
+            "deaths": 3993,
+            "recoveries": 29812
+        },
+        "IRQ": {
+            "iERPScoreB": 3.7,
+            "cases": 1202,
+            "deaths": 69,
+            "recoveries": 452
+        },
+        "ISL": {
+            "iERPScoreB": 2.575,
+            "cases": 1616,
+            "deaths": 6,
+            "recoveries": 633
+        },
+        "ISR": {
+            "iERPScoreB": 1.2,
+            "cases": 9404,
+            "deaths": 73,
+            "recoveries": 801
+        },
+        "ITA": {
+            "iERPScoreB": 1.2,
+            "cases": 139422,
+            "deaths": 17669,
+            "recoveries": 26491
+        },
+        "JOR": {
+            "iERPScoreB": 8.17,
+            "cases": 358,
+            "deaths": 6,
+            "recoveries": 150
+        },
+        "JPN": {
+            "iERPScoreB": 1.2,
+            "cases": 4257,
+            "deaths": 93,
+            "recoveries": 622
+        },
+        "KAZ": {
+            "iERPScoreB": 6.540000000000001,
+            "cases": 727,
+            "deaths": 7,
+            "recoveries": 54
+        },
+        "KEN": {
+            "iERPScoreB": 2.2,
+            "cases": 179,
+            "deaths": 6,
+            "recoveries": 9
+        },
+        "KOR": {
+            "iERPScoreB": 6.04,
+            "cases": 10384,
+            "deaths": 200,
+            "recoveries": 6776
+        },
+        "KWT": {
+            "iERPScoreB": 7.890000000000001,
+            "cases": 855,
+            "deaths": 1,
+            "recoveries": 111
+        },
+        "LAO": {
+            "iERPScoreB": 4.7,
+            "cases": 15,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "LBN": {
+            "iERPScoreB": 1.2,
+            "cases": 576,
+            "deaths": 19,
+            "recoveries": 62
+        },
+        "LKA": {
+            "iERPScoreB": 2.2,
+            "cases": 189,
+            "deaths": 7,
+            "recoveries": 44
+        },
+        "LUX": {
+            "iERPScoreB": 8.165000000000001,
+            "cases": 3034,
+            "deaths": 46,
+            "recoveries": 500
+        },
+        "MAR": {
+            "iERPScoreB": 1.5,
+            "cases": 1275,
+            "deaths": 93,
+            "recoveries": 97
+        },
+        "MDG": {
+            "iERPScoreB": 2.5,
+            "cases": 93,
+            "deaths": 0,
+            "recoveries": 11
+        },
+        "MEX": {
+            "iERPScoreB": 4.7,
+            "cases": 2785,
+            "deaths": 141,
+            "recoveries": 633
+        },
+        "MLI": {
+            "iERPScoreB": 1.2,
+            "cases": 59,
+            "deaths": 7,
+            "recoveries": 16
+        },
+        "MMR": {
+            "iERPScoreB": 1.2,
+            "cases": 22,
+            "deaths": 3,
+            "recoveries": 0
+        },
+        "MNG": {
+            "iERPScoreB": 1.2,
+            "cases": 16,
+            "deaths": 0,
+            "recoveries": 4
+        },
+        "MUS": {
+            "iERPScoreB": 8.42,
+            "cases": 273,
+            "deaths": 7,
+            "recoveries": 19
+        },
+        "MWI": {
+            "iERPScoreB": 1.92,
+            "cases": 8,
+            "deaths": 1,
+            "recoveries": 0
+        },
+        "MYS": {
+            "iERPScoreB": 9.5,
+            "cases": 4119,
+            "deaths": 65,
+            "recoveries": 1487
+        },
+        "NGA": {
+            "iERPScoreB": 1.2,
+            "cases": 276,
+            "deaths": 6,
+            "recoveries": 44
+        },
+        "NIC": {
+            "iERPScoreB": 1.2,
+            "cases": 6,
+            "deaths": 1,
+            "recoveries": 0
+        },
+        "NLD": {
+            "iERPScoreB": 1.2,
+            "cases": 20682,
+            "deaths": 2255,
+            "recoveries": 272
+        },
+        "NOR": {
+            "iERPScoreB": 1.2,
+            "cases": 6086,
+            "deaths": 101,
+            "recoveries": 32
+        },
+        "NZL": {
+            "iERPScoreB": 1.2,
+            "cases": 1210,
+            "deaths": 1,
+            "recoveries": 282
+        },
+        "OMN": {
+            "iERPScoreB": 1.2,
+            "cases": 419,
+            "deaths": 2,
+            "recoveries": 72
+        },
+        "PAK": {
+            "iERPScoreB": 9.7,
+            "cases": 4263,
+            "deaths": 61,
+            "recoveries": 467
+        },
+        "PAN": {
+            "iERPScoreB": 1.2,
+            "cases": 2249,
+            "deaths": 59,
+            "recoveries": 16
+        },
+        "PER": {
+            "iERPScoreB": 9.07,
+            "cases": 4342,
+            "deaths": 121,
+            "recoveries": 1333
+        },
+        "PHL": {
+            "iERPScoreB": 1.2,
+            "cases": 3870,
+            "deaths": 182,
+            "recoveries": 96
+        },
+        "PNG": {
+            "iERPScoreB": 1.2,
+            "cases": 2,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "POL": {
+            "iERPScoreB": 3.2,
+            "cases": 5205,
+            "deaths": 159,
+            "recoveries": 222
+        },
+        "PRT": {
+            "iERPScoreB": 7.7,
+            "cases": 13141,
+            "deaths": 380,
+            "recoveries": 196
+        },
+        "PRY": {
+            "iERPScoreB": 8.45,
+            "cases": 119,
+            "deaths": 5,
+            "recoveries": 15
+        },
+        "QAT": {
+            "iERPScoreB": 1.2,
+            "cases": 2210,
+            "deaths": 6,
+            "recoveries": 178
+        },
+        "ROU": {
+            "iERPScoreB": 8.2,
+            "cases": 4761,
+            "deaths": 220,
+            "recoveries": 528
+        },
+        "RUS": {
+            "iERPScoreB": 8.790000000000001,
+            "cases": 8672,
+            "deaths": 63,
+            "recoveries": 580
+        },
+        "RWA": {
+            "iERPScoreB": 8.45,
+            "cases": 110,
+            "deaths": 0,
+            "recoveries": 7
+        },
+        "SAU": {
+            "iERPScoreB": 1.2,
+            "cases": 2932,
+            "deaths": 41,
+            "recoveries": 631
+        },
+        "SGP": {
+            "iERPScoreB": 1.2,
+            "cases": 1623,
+            "deaths": 6,
+            "recoveries": 406
+        },
+        "SLE": {
+            "iERPScoreB": 1.2,
+            "cases": 7,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "SLV": {
+            "iERPScoreB": 9.2,
+            "cases": 93,
+            "deaths": 5,
+            "recoveries": 9
+        },
+        "SRB": {
+            "iERPScoreB": 2.2,
+            "cases": 2666,
+            "deaths": 65,
+            "recoveries": 0
+        },
+        "SSD": {
+            "iERPScoreB": 1.2,
+            "cases": 2,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "SVK": {
+            "iERPScoreB": 6.540000000000001,
+            "cases": 682,
+            "deaths": 2,
+            "recoveries": 16
+        },
+        "SVN": {
+            "iERPScoreB": 1.2,
+            "cases": 1091,
+            "deaths": 40,
+            "recoveries": 120
+        },
+        "SWE": {
+            "iERPScoreB": 1.2,
+            "cases": 8419,
+            "deaths": 687,
+            "recoveries": 205
+        },
+        "SWZ": {
+            "iERPScoreB": 1.2,
+            "cases": 12,
+            "deaths": 0,
+            "recoveries": 7
+        },
+        "SYC": {
+            "iERPScoreB": 1.2,
+            "cases": 11,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "SYR": {
+            "iERPScoreB": 5.7,
+            "cases": 19,
+            "deaths": 2,
+            "recoveries": 4
+        },
+        "THA": {
+            "iERPScoreB": 1.2,
+            "cases": 2369,
+            "deaths": 30,
+            "recoveries": 888
+        },
+        "TUN": {
+            "iERPScoreB": 1.2,
+            "cases": 628,
+            "deaths": 24,
+            "recoveries": 25
+        },
+        "TUR": {
+            "iERPScoreB": 1.2,
+            "cases": 38226,
+            "deaths": 812,
+            "recoveries": 1846
+        },
+        "TZA": {
+            "iERPScoreB": 3.075,
+            "cases": 25,
+            "deaths": 1,
+            "recoveries": 5
+        },
+        "UGA": {
+            "iERPScoreB": 1.2,
+            "cases": 53,
+            "deaths": 0,
+            "recoveries": 0
+        },
+        "UKR": {
+            "iERPScoreB": 9.75,
+            "cases": 1668,
+            "deaths": 52,
+            "recoveries": 35
+        },
+        "URY": {
+            "iERPScoreB": 3.075,
+            "cases": 424,
+            "deaths": 7,
+            "recoveries": 150
+        },
+        "USA": {
+            "iERPScoreB": 1.2,
+            "cases": 429052,
+            "deaths": 14695,
+            "recoveries": 23559
+        },
+        "UZB": {
+            "iERPScoreB": 2.2,
+            "cases": 545,
+            "deaths": 3,
+            "recoveries": 30
+        },
+        "VEN": {
+            "iERPScoreB": 9.35,
+            "cases": 167,
+            "deaths": 9,
+            "recoveries": 65
+        },
+        "VNM": {
+            "iERPScoreB": 8.7,
+            "cases": 251,
+            "deaths": 0,
+            "recoveries": 126
+        },
+        "ZAF": {
+            "iERPScoreB": 1.2,
+            "cases": 1845,
+            "deaths": 18,
+            "recoveries": 95
+        },
+        "ZMB": {
+            "iERPScoreB": 1.2,
+            "cases": 39,
+            "deaths": 1,
+            "recoveries": 7
+        },
+        "ZWE": {
+            "iERPScoreB": 8.32,
+            "cases": 11,
+            "deaths": 3,
+            "recoveries": 0
+        },
+        "TWN": {
+            "iERPScoreB": 0.64,
+            "cases": 379,
+            "deaths": 5,
+            "recoveries": 61
         }
     }
 }

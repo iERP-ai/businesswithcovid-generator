@@ -104,7 +104,7 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
 
     d = {}
 
-    top5 = df_stringency.groupby('CountryName').tail(1).set_index('CountryName')['iERPScoreB'].nlargest(5)
+    top5 = df_stringency.groupby('CountryCode').tail(1).set_index('CountryCode')['iERPScoreB'].nlargest(5)
     d['topCountriesImpacted'] = dict(top5)
 
     d['topCountriesByGDP'] = {}
@@ -299,8 +299,8 @@ def do_json_per_country(country, alpha3, df_stringency):
 
     d['graphs'] = {
         'iERPScoreB': {'history': [], 'forecast': []},
-        'cases': {'history': []},
-        'deaths': {'history': []},
+        'cases': {'history': [], 'forecast': []},
+        'deaths': {'history': [], 'forecast': []},
         }
 
     for scorePredicted, dateISO in predict_scores(
@@ -309,12 +309,11 @@ def do_json_per_country(country, alpha3, df_stringency):
         d['graphs']['iERPScoreB']['forecast'].append(
             {'d': '"' + dateISO + '"', 'iERPScoreB': round(scorePredicted, 3)})
 
-    d['graphs']['cases']['prediction'] = []
     for cases, dateISO in predict_cases(
         df_stringency['ConfirmedCases'][-4:],
         df_stringency['Date'][-4:],
         ):
-        d['graphs']['cases']['prediction'].append(
+        d['graphs']['cases']['forecast'].append(
             {'d': '"' + dateISO + '"', 'cases': int(cases)})
 
     for Date, iERPScoreB, cases, deaths in zip(
