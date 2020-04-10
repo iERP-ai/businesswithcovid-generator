@@ -4,6 +4,7 @@ import iso3166
 import json
 from datetime import datetime
 
+
 def main():
 
     url_confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
@@ -46,7 +47,7 @@ def main():
     d_name2alpha = prepare_country_dict(df_stringency)
     d_alpha2name = {}
     for country in df_confirmed['Country/Region'].unique():
-        ## Skip cruise line ships.
+        # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
             continue
         d_alpha2name[d_name2alpha[country]] = country
@@ -67,10 +68,9 @@ def main():
         )
 
     for country in df_confirmed['Country/Region'].unique():
-        ## Skip cruise line ships.
+        # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
             continue
-    # for country in df_stringency['CountryName'].unique():
         alpha3 = d_name2alpha[country]
         if alpha3 not in df_stringency['CountryCode'].unique():
             continue
