@@ -5,7 +5,9 @@ import pycountry
 import iso3166
 import json
 from datetime import datetime
-from datetime import timedelta  
+from datetime import timedelta
+import itertools
+import operator
 
 
 def main():
@@ -25,10 +27,14 @@ def main():
         url_stringency,
         ) = tmp_download()
 
+    print('reading', url_confirmed)
     df_confirmed = pd.read_csv(url_confirmed)
+    print('reading', url_deaths)
     df_deaths = pd.read_csv(url_deaths)
+    print('reading', url_recovered)
     df_recovered = pd.read_csv(url_recovered)
 
+    print('reading', url_stringency)
     df_stringency = pd.read_csv(url_stringency).fillna(0)
 
     # # Only include data older than today.
@@ -45,6 +51,7 @@ def main():
     df_stringency = df_stringency[
         df_stringency['Date'] <= max(intDateToday - 1, intDateCommon)]
 
+    print('calculating iERPScoreB')
     calculate_iERPScoreB(df_stringency)
 
     d_name2alpha = prepare_country_dict(df_stringency)
@@ -64,12 +71,15 @@ def main():
 
     df_merged = merge_data_frames(
         df_confirmed, df_deaths, df_recovered)
+
+    print('creating json files for each country')
     do_json_across_countries(
         df_merged,
         df_stringency,
         d_alpha2name,
         )
 
+    print('creating json file across countries')
     for country in df_confirmed['Country/Region'].unique():
         # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
@@ -82,6 +92,8 @@ def main():
             alpha3,
             df_stringency[df_stringency['CountryCode'] == alpha3],
             )
+
+    print('all done - happy days')
 
     return
 
@@ -163,7 +175,110 @@ def predict_cases(cases, dates):
 
     return predictions
 
+
+def append_predictions(dateLast, value, deltaDays1, deltaDays2):
+
+    predictions = []
+
+    for days in range(deltaDays1, deltaDays2 + 1):
+        dateISO = operator.add(
+            datetime.strptime(str(dateLast), '%Y%m%d'),
+            timedelta(days=days),
+            ).strftime('%Y-%m-%d')
+        predictions.append([value, dateISO])
+
+    return predictions
+
+
+def predict_scores(scores, dates):
+
+    # https://github.com/iERP-ai/businesswithcovid-generator/issues/5
+
+    predictions = []
+
+    dateLast = dates.tail(1).iat[0]
+    valueLast = scores.tail(1).iat[0]
+
+    scoresConsecutive, daysConsecutive = zip(*(
+        (k, len(list(g))) for k, g in itertools.groupby(scores)))
+
+    assert scoresConsecutive[-1] == valueLast
+
+    val1 = scoresConsecutive[-1]
+    val2 = scoresConsecutive[-2]
+    len1 = daysConsecutive[-1]
+    len2 = daysConsecutive[-2]
+
+    # 1. if today's business score is less than 3 ->
+    # today+1 - today+21 = will be equal current business score
+    if val1 < 3:
+        predictions += append_predictions(dateLast, val1, 1, 21)
+
+    # 2. if "val1" is more than 8 and "len1" is higher than 14 ->
+    # today+1 - today+4 = today's business score
+    elif val1 > 8 and len1 > 14:
+        predictions += append_predictions(dateLast, val1, 1, 4)
+        # if "val2" is less than 7 -> today+5 - today+21 = val2
+        if val2 < 7:
+            predictions += append_predictions(dateLast, val2, 5, 21)
+        # if "val2" is more or equal 7 -> today+5 - today+21 = (val2 - 1)
+        else:
+            predictions += append_predictions(dateLast, val2 - 1, 5, 21)
+
+    # 3. if "val1" < "val2" and "len1" is higher than 5 days ->
+    # today+1 - today+4 = today's business score
+    # today+5 - today+21 = val1*0.6
+    elif val1 < val2 and len1 > 5:
+        predictions += append_predictions(dateLast, val1, 1, 4)
+        predictions += append_predictions(dateLast, val1 * 0.6, 5, 21)
+
+    # 4. if "val1" is more than 8 and "len1" is lower than 14 ->
+    # today+1 - today+(14-"len1") = today's business score
+    elif val1 > 8 and len1 < 14:
+        predictions += append_predictions(dateLast, val1, 1, 14 - len1)
+        # if "val2" is less than 7 -> today+(14-"len1") - today+21 = val2
+        if val2 < 7:
+            assert len1 < 14  # Make Jozef aware it can throw an assertion error!
+            predictions += append_predictions(dateLast, val2, 14 - len1 + 1, 21)
+        # if "val2" is more or equal 7 -> today+(14-"len1") - today+21 = (val2 - 1)
+        else:
+            predictions += append_predictions(dateLast, val2 - 1, 14 - len1 + 1, 21)
+
+    # 5. if "val1" > "val2" and val1 is between 3 and 5 ->
+    # today+1 - today+4 = today's business score
+    # today+5 - today+21 = 8
+    elif val1 > val2 and 3 <= val1 <= 5:
+        predictions += append_predictions(dateLast, val1, 1, 4)
+        predictions += append_predictions(dateLast, 8, 5, 21)
+
+    # 6. if "val1" > "val2" and val1 is between 5 and 8 ->
+    # today+1 - today+4 = today's business score
+    # today+5 - today+21 = 8.2
+    elif val1 > val2 and 5 <= val1 <= 8:
+        predictions += append_predictions(dateLast, val1, 1, 4)
+        predictions += append_predictions(dateLast, 8.2, 5, 21)
+
+    # 7.
+    elif val1 < val2 and len1 < 5:
+        predictions += append_predictions(dateLast, val1, 1, 4)
+        predictions += append_predictions(dateLast, val1 * 0.8, 5, 21)
+
+    # This should not happen.
+    else:
+        print(list(scores))
+        print(val1, val2)
+        print(len1, len2)
+        exit()
+
+    # Check that a prediction is not made for the same date twice.
+    assert len(predictions) == len(set(list(zip(*predictions))[1])), predictions
+
+    return predictions
+
+
 def do_json_per_country(country, alpha3, df_stringency):
+
+    # https://github.com/iERP-ai/businesswithcovid-generator/issues/1
 
     d = {}
     d['limitations'] = []
@@ -183,15 +298,24 @@ def do_json_per_country(country, alpha3, df_stringency):
     d['scores'] = {'iERPScoreBNow': float(df_stringency['iERPScoreB'].tail(1))}
 
     d['graphs'] = {
-        'iERPScoreB': {'history': []},
+        'iERPScoreB': {'history': [], 'forecast': []},
         'cases': {'history': []},
         'deaths': {'history': []},
         }
-    
+
+    for scorePredicted, dateISO in predict_scores(
+        df_stringency['iERPScoreB'], df_stringency['Date'],
+        ):
+        d['graphs']['iERPScoreB']['forecast'].append(
+            {'d': '"' + dateISO + '"', 'iERPScoreB': scorePredicted})
+
     d['graphs']['cases']['prediction'] = []
-    for cases, dateISO in predict_cases (df_stringency['ConfirmedCases'][-4:], df_stringency['Date'][-4:]):
+    for cases, dateISO in predict_cases(
+        df_stringency['ConfirmedCases'][-4:],
+        df_stringency['Date'][-4:],
+        ):
         d['graphs']['cases']['prediction'].append(
-            { 'd': dateISO, 'cases': cases})
+            {'d': '"' + dateISO + '"', 'cases': cases})
 
     for Date, iERPScoreB, cases, deaths in zip(
         df_stringency['Date'],
@@ -201,11 +325,11 @@ def do_json_per_country(country, alpha3, df_stringency):
         ):
         dateISO = datetime.strptime(str(Date), '%Y%m%d').strftime('%Y-%m-%d')
         d['graphs']['iERPScoreB']['history'].append(
-            {'d': dateISO, 'iERPScoreB': iERPScoreB})
+            {'d': '"' + dateISO + '"', 'iERPScoreB': iERPScoreB})
         d['graphs']['cases']['history'].append(
-            {'d': dateISO, 'cases': cases})
+            {'d': '"' + dateISO + '"', 'cases': cases})
         d['graphs']['deaths']['history'].append(
-            {'d': dateISO, 'deaths': deaths})
+            {'d': '"' + dateISO + '"', 'deaths': deaths})
 
     with open('country-data-{}.json'.format(alpha3), 'w') as f:
         json.dump(d, f, indent=4)
