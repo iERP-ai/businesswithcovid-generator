@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 import pandas as pd
 import pycountry
 import iso3166
@@ -113,7 +113,7 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
     for CountryCode in df_stringency['CountryCode'].unique():
 
         # Skip Aruba (Netherlands), Bermuda (UK), Hong Kong (China), Lesotho, Macau (China), Puerto Rico (US)
-        if not CountryCode in d_alpha2name.keys():
+        if CountryCode not in d_alpha2name.keys():
             continue
 
         df = df_stringency[df_stringency['CountryCode'] == CountryCode][['Date', 'iERPScoreB']].tail(8)
@@ -149,29 +149,35 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
     return
 
 
-def predict_cases(cases, dates):    
+def predict_cases(cases, dates):
     s = pd.Series(cases)
 
     change = s.pct_change(periods=3).tail(1).iat[0]
     lastValue = cases.tail(1).iat[0]
     lastDate = dates.tail(1).iat[0]
-    reduction = change/100*3
+    reduction = change / 100 * 3
 
     predictions = []
 
-    if (lastValue<30):
+    if (lastValue < 30):
         for x in range(0, 21):
-            dateISO = (datetime.strptime(str(lastDate), '%Y%m%d') + timedelta(days=x)).strftime('%Y-%m-%d')
-            predictions.append ([lastValue, dateISO])
+            dateISO = operator.add(
+                datetime.strptime(str(lastDate), '%Y%m%d'),
+                timedelta(days=x),
+                ).strftime('%Y-%m-%d')
+            predictions.append([lastValue, dateISO])
             lastDate = lastDate + 1
 
     else:
         for x in range(0, 21):
-            dateISO = (datetime.strptime(str(lastDate), '%Y%m%d') + timedelta(days=x)).strftime('%Y-%m-%d')
-            predictions.append ([lastValue, dateISO])
+            dateISO = operator.add(
+                datetime.strptime(str(lastDate), '%Y%m%d'),
+                timedelta(days=x),
+                ).strftime('%Y-%m-%d')
+            predictions.append([lastValue, dateISO])
 
             change = change - reduction
-            lastValue = lastValue + (lastValue*change)
+            lastValue = lastValue + (lastValue * change)
 
     return predictions
 
@@ -182,7 +188,7 @@ def append_predictions(dateLast, value, deltaDays1, deltaDays2):
 
     for days in range(deltaDays1, deltaDays2 + 1):
         dateISO = operator.add(
-            datetime.strptime(str(dateLast), '%Y%m%d'),
+            dateLast,
             timedelta(days=days),
             ).strftime('%Y-%m-%d')
         predictions.append([value, dateISO])
@@ -194,10 +200,11 @@ def predict_scores(scores, dates):
 
     # https://github.com/iERP-ai/businesswithcovid-generator/issues/5
 
-    predictions = []
-
-    dateLast = dates.tail(1).iat[0]
+    dateLast = datetime.strptime(str(
+        dates.tail(1).iat[0]), '%Y%m%d')
     valueLast = scores.tail(1).iat[0]
+
+    predictions = [[valueLast, dateLast.strftime('%Y-%m-%d')]]
 
     scoresConsecutive, daysConsecutive = zip(*(
         (k, len(list(g))) for k, g in itertools.groupby(scores)))
@@ -272,8 +279,8 @@ def predict_scores(scores, dates):
 
     # Check that a prediction is not made for the same date twice.
     assert len(predictions) == len(set(list(zip(*predictions))[1])), predictions
-    # Check that predictions are for the next 3 weeks.
-    assert len(predictions) == 21, predictions
+    # Check that predictions are for the latest date and the next 3 weeks.
+    assert len(predictions) == 1 + 21, predictions
 
     return predictions
 
@@ -307,19 +314,14 @@ def do_json_per_country(country, alpha3, df_stringency):
 
     dateLatest = df_stringency['Date'].tail(1).iat[0]
     for i, (scorePredicted, dateISO) in enumerate(
-        itertools.chain(
-            [(
-                round(df_stringency['iERPScoreB'].tail(1).iat[0], 3),
-                datetime.strptime(str(dateLatest), '%Y%m%d').strftime('%Y-%m-%d'),
-                )],
-            predict_scores(
-                df_stringency['iERPScoreB'],
-                df_stringency['Date'],
-                ))):
+        predict_scores(
+            df_stringency['iERPScoreB'],
+            df_stringency['Date'],
+            )):
         d['graphs']['iERPScoreB']['forecast'].append(
             {'d': dateISO, 'iERPScoreB': round(scorePredicted, 3)})
-        if i + 1 in (7, 14, 21):
-            d['scores']['iERPScoreBDays{}'.format(i + 1)] = round(scorePredicted, 3)
+        if i in (7, 14, 21):
+            d['scores']['iERPScoreBDays{}'.format(i)] = round(scorePredicted, 3)
 
     for cases, dateISO in predict_cases(
         df_stringency['ConfirmedCases'][-4:],
@@ -372,63 +374,64 @@ def limitations_translation(column, value):
     }
 
     d_values = {
-    'S1': {
-        100: 'All schools closed in whole country',
-        75: 'All schools recommended to be closed in whole country',
-        50: 'Schools closed in some regions',
-        25: 'Schools recommended to be closed in some regions',
-        0: 'All schools open',
-        },
-    'S2': {
-        100: 'Workplaces require closing in whole country',
-        75: 'Workplaces recommended to be closed in whole country',
-        50: 'Workplaces require closing in some regions',
-        25: 'Workplaces recommended to be closed in some regions',
-        0: 'No restrictions on workplaces closing' },
-    'S3': {
-        100: 'Public events cancelled in whole country',
-        75: 'Public events recommended to be cancelled in whole country',
-        50: 'Public events cancelled in some regions',
-        25: 'Public events recommended to be cancelled in some regions',
-        0: 'No restrictions on Public events',
-        },
-    'S4': {
-        100: 'Public transportation closed in whole country',
-        75: 'Public transportation recommended to be closed in whole country',
-        50: 'Public transportation closed in some regions',
-        25: 'Public transportation recommended to be closed in some regions',
-        0: 'No restrictions on Public transportation',
-        },
-    'S5': {
-        100: 'COVID-19 public information campaign launched in whole country',
-        50: 'COVID-19 public information campaign launched in some regions',
-        0: 'No COVID-19 public information campaign launched',
-        },
-    'S6': {
-        100: 'Restricted public movement in whole country',
-        75: 'Restricted public movement recommended in whole country',
-        50: 'Restricted public movement in some regions',
-        25: 'Restricted public movement recommended in some regions',
-        0: 'No restrictions on public movement',
-        },
-    'S7': {
-        100: 'Travel ban on high-risk regions',
-        70: 'Quarantine on travel from high-risk regions',
-        30: 'Screening on travel from high-risk regions',
-        0: 'No travel controls',
-        },
-    'S12': {
-        100: 'No testing policy on COVID-19',
-        70: 'Selective testing on COVID-19',
-        40: 'Testing of anyone showing COVID-19 symptoms',
-        20: 'Open public testing available',
-        },
-    'S13': {
-        100: 'No contact tracing of COVID-19 infected individuals',
-        60: 'Limited contact tracing of COVID-19 infected individuals',
-        20: 'Comprehensive contact tracing of COVID-19 infected individuals for all cases',
-        },
-    }
+        'S1': {
+            100: 'All schools closed in whole country',
+            75: 'All schools recommended to be closed in whole country',
+            50: 'Schools closed in some regions',
+            25: 'Schools recommended to be closed in some regions',
+            0: 'All schools open',
+            },
+        'S2': {
+            100: 'Workplaces require closing in whole country',
+            75: 'Workplaces recommended to be closed in whole country',
+            50: 'Workplaces require closing in some regions',
+            25: 'Workplaces recommended to be closed in some regions',
+            0: 'No restrictions on workplaces closing',
+            },
+        'S3': {
+            100: 'Public events cancelled in whole country',
+            75: 'Public events recommended to be cancelled in whole country',
+            50: 'Public events cancelled in some regions',
+            25: 'Public events recommended to be cancelled in some regions',
+            0: 'No restrictions on Public events',
+            },
+        'S4': {
+            100: 'Public transportation closed in whole country',
+            75: 'Public transportation recommended to be closed in whole country',
+            50: 'Public transportation closed in some regions',
+            25: 'Public transportation recommended to be closed in some regions',
+            0: 'No restrictions on Public transportation',
+            },
+        'S5': {
+            100: 'COVID-19 public information campaign launched in whole country',
+            50: 'COVID-19 public information campaign launched in some regions',
+            0: 'No COVID-19 public information campaign launched',
+            },
+        'S6': {
+            100: 'Restricted public movement in whole country',
+            75: 'Restricted public movement recommended in whole country',
+            50: 'Restricted public movement in some regions',
+            25: 'Restricted public movement recommended in some regions',
+            0: 'No restrictions on public movement',
+            },
+        'S7': {
+            100: 'Travel ban on high-risk regions',
+            70: 'Quarantine on travel from high-risk regions',
+            30: 'Screening on travel from high-risk regions',
+            0: 'No travel controls',
+            },
+        'S12': {
+            100: 'No testing policy on COVID-19',
+            70: 'Selective testing on COVID-19',
+            40: 'Testing of anyone showing COVID-19 symptoms',
+            20: 'Open public testing available',
+            },
+        'S13': {
+            100: 'No contact tracing of COVID-19 infected individuals',
+            60: 'Limited contact tracing of COVID-19 infected individuals',
+            20: 'Comprehensive contact tracing of COVID-19 infected individuals for all cases',
+            },
+        }
 
     d_icons = {
         'S1': 'ExperimentOutlined',
