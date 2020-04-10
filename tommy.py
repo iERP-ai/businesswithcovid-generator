@@ -272,6 +272,8 @@ def predict_scores(scores, dates):
 
     # Check that a prediction is not made for the same date twice.
     assert len(predictions) == len(set(list(zip(*predictions))[1])), predictions
+    # Check that predictions are for the next 3 weeks.
+    assert len(predictions) == 21, predictions
 
     return predictions
 
@@ -303,18 +305,28 @@ def do_json_per_country(country, alpha3, df_stringency):
         'deaths': {'history': [], 'forecast': []},
         }
 
-    for scorePredicted, dateISO in predict_scores(
-        df_stringency['iERPScoreB'], df_stringency['Date'],
-        ):
+    dateLatest = df_stringency['Date'].tail(1).iat[0]
+    for i, (scorePredicted, dateISO) in enumerate(
+        itertools.chain(
+            [(
+                round(df_stringency['iERPScoreB'].tail(1).iat[0], 3),
+                datetime.strptime(str(dateLatest), '%Y%m%d').strftime('%Y-%m-%d'),
+                )],
+            predict_scores(
+                df_stringency['iERPScoreB'],
+                df_stringency['Date'],
+                ))):
         d['graphs']['iERPScoreB']['forecast'].append(
-            {'d': '"' + dateISO + '"', 'iERPScoreB': round(scorePredicted, 3)})
+            {'d': dateISO, 'iERPScoreB': round(scorePredicted, 3)})
+        if i + 1 in (7, 14, 21):
+            d['scores']['iERPScoreBDays{}'.format(i + 1)] = round(scorePredicted, 3)
 
     for cases, dateISO in predict_cases(
         df_stringency['ConfirmedCases'][-4:],
         df_stringency['Date'][-4:],
         ):
         d['graphs']['cases']['forecast'].append(
-            {'d': '"' + dateISO + '"', 'cases': int(cases)})
+            {'d': dateISO, 'cases': int(cases)})
 
     for Date, iERPScoreB, cases, deaths in zip(
         df_stringency['Date'],
@@ -324,11 +336,11 @@ def do_json_per_country(country, alpha3, df_stringency):
         ):
         dateISO = datetime.strptime(str(Date), '%Y%m%d').strftime('%Y-%m-%d')
         d['graphs']['iERPScoreB']['history'].append(
-            {'d': '"' + dateISO + '"', 'iERPScoreB': iERPScoreB})
+            {'d': dateISO, 'iERPScoreB': iERPScoreB})
         d['graphs']['cases']['history'].append(
-            {'d': '"' + dateISO + '"', 'cases': cases})
+            {'d': dateISO, 'cases': cases})
         d['graphs']['deaths']['history'].append(
-            {'d': '"' + dateISO + '"', 'deaths': deaths})
+            {'d': dateISO, 'deaths': deaths})
 
     with open('country-data-{}.json'.format(alpha3), 'w') as f:
         json.dump(d, f, indent=4)
