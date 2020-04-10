@@ -27,9 +27,29 @@ def main():
 
     df_stringency = pd.read_csv(url_stringency).fillna(0)
 
+    # # Only include data older than today.
+    intDateToday = int(datetime.today().strftime('%Y%m%d'))
+    # df_stringency = df_stringency[
+    #     df_stringency['Date'] < intDateToday]
+
+    # # Find most recent common date across countries.
+    intDateCommon = df_stringency.groupby('CountryName').tail(1)['Date'].min()
+    # df_stringency = df_stringency[
+    #     df_stringency['Date'] <= intDateCommon]
+
+    # Exclude data newer than today or newer than most recent common date across countries.
+    df_stringency = df_stringency[
+        df_stringency['Date'] <= max(intDateToday - 1, intDateCommon)]
+
     calculate_iERPScoreB(df_stringency)
 
     d_name2alpha = prepare_country_dict(df_stringency)
+    d_alpha2name = {}
+    for country in df_confirmed['Country/Region'].unique():
+        ## Skip cruise line ships.
+        if country in ('Diamond Princess', 'MS Zaandam'):
+            continue
+        d_alpha2name[d_name2alpha[country]] = country
 
     # Check completeness and correctness of country dictionary.
     set1 = set(df_confirmed['Country/Region'].values)
@@ -38,22 +58,74 @@ def main():
     _ = set1 - set2 - set3
     assert len(_) == 0, _
 
-    # for country in df_confirmed['Country/Region'].unique():
-    for country in df_stringency['CountryName'].unique():
-        # df_merged = merge_data_frames(
-        #     country, df_confirmed, df_deaths, df_recovered)
+    df_merged = merge_data_frames(
+        df_confirmed, df_deaths, df_recovered)
+    do_json_across_countries(
+        df_merged,
+        df_stringency,
+        d_alpha2name,
+        )
+
+    for country in df_confirmed['Country/Region'].unique():
+        ## Skip cruise line ships.
+        if country in ('Diamond Princess', 'MS Zaandam'):
+            continue
+    # for country in df_stringency['CountryName'].unique():
         alpha3 = d_name2alpha[country]
-        do_json(
+        if alpha3 not in df_stringency['CountryCode'].unique():
+            continue
+        do_json_per_country(
             country,
             alpha3,
-            # df_merged,
             df_stringency[df_stringency['CountryCode'] == alpha3],
             )
 
     return
 
 
-def do_json(country, alpha3, df_stringency):
+def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
+
+    # print(df_stringency)
+
+    d = {}
+
+    top5 = df_stringency.groupby('CountryName').tail(1).set_index('CountryName')['iERPScoreB'].nlargest(5)
+    d['topCountriesImpacted'] = dict(top5)
+
+    d['topCountriesByGDP'] = {}
+    d['map'] = {}
+    for CountryCode in ('USA', 'CHN', 'JPN', 'DEU', 'IND'):
+        df = df_stringency[df_stringency['CountryCode'] == CountryCode][['Date', 'iERPScoreB']].tail(8)
+        _ = float(df.head(1)['iERPScoreB']) - float(df.tail(1)['iERPScoreB'])
+        if _ > 0:
+            icon = 'FallOutlined'
+            color = '#444'
+        elif _ < 0:
+            icon = 'RiseOutlined'
+            color = '#000'
+        else:
+            icon = 'MinusOutlined'
+            color = '#000'
+        d['topCountriesByGDP'][CountryCode] = {
+            'iERPScoreB': float(df.tail(1)['iERPScoreB']),
+            'icon': icon,
+            'color': color,
+            }
+        countryName = d_alpha2name[CountryCode]
+        d['map'][CountryCode] = {
+            'iERPScoreB': float(df.tail(1)['iERPScoreB']),
+            'cases': int(df_merged[countryName, 'confirmed'].tail(1)),
+            'deaths': int(df_merged[countryName, 'deaths'].tail(1)),
+            'recoveries': int(df_merged[countryName, 'recovered'].tail(1)),
+            }
+
+    with open('homepage-data.json', 'w') as f:
+        json.dump(d, f, indent=4)
+
+    return
+
+
+def do_json_per_country(country, alpha3, df_stringency):
 
     d = {}
     d['limitations'] = []
@@ -123,7 +195,26 @@ def limitations_translation(column, value):
     return name, value, icon, colorB, colorT
 
 
-def merge_data_frames(country, df_confirmed, df_deaths, df_recovered):
+def merge_data_frames(df_confirmed, df_deaths, df_recovered):
+
+    df_confirmed['key'] = 'confirmed'
+    df_deaths['key'] = 'deaths'
+    df_recovered['key'] = 'recovered'
+
+    # Sum across countries with overseas territories such as:
+    # UK, Denmark, Netherlands, France
+
+    # Do merge, grouping, sum and transpose.
+    df = pd.concat([
+        df_confirmed.drop(['Lat', 'Long'], axis=1),
+        df_deaths.drop(['Lat', 'Long'], axis=1),
+        df_recovered.drop(['Lat', 'Long'], axis=1),
+        ]).groupby(['Country/Region', 'key']).sum().transpose()
+
+    return df
+
+
+def merge_data_frames1(country, df_confirmed, df_deaths, df_recovered):
 
     df_confirmed_sum = df_confirmed.groupby('Country/Region').sum().reset_index()
     df_deaths_sum = df_deaths.groupby('Country/Region').sum().reset_index()
@@ -163,8 +254,6 @@ def prepare_country_dict(df_stringency):
         d_name2alpha[country.name] = country.alpha_3
 
     for country in iso3166.countries:
-        if 'Congo' in country.name:
-            print(country)
         d_name2alpha[country.name] = country.alpha3
         d_name2alpha[country.apolitical_name] = country.alpha3
 
