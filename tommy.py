@@ -507,7 +507,8 @@ def prepare_country_dict(df_stringency):
     d_name2alpha['Korea, South'] = d_name2alpha['South Korea']
     d_name2alpha['Taiwan*'] = d_name2alpha['Taiwan']
     d_name2alpha['Holy See'] = d_name2alpha['Holy See (Vatican City State)']
-    d_name2alpha["Cote d'Ivoire"] = d_name2alpha["Côte d'Ivoire"]
+    # d_name2alpha["Cote d'Ivoire"] = d_name2alpha["Côte d'Ivoire"]
+    d_name2alpha["Cote d'Ivoire"] = 'CIV'
     d_name2alpha['Burma'] = d_name2alpha['Myanmar']
     d_name2alpha['West Bank and Gaza'] = d_name2alpha['Palestine, State of']
     d_name2alpha['Congo (Brazzaville)'] = d_name2alpha['Republic of the Congo']
