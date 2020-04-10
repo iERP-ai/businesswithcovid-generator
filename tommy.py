@@ -169,7 +169,8 @@ def do_json_per_country(country, alpha3, df_stringency):
     d['limitations'] = []
 
     for column in ('S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S12', 'S13'):
-        value = float(df_stringency[column].tail(1) / 10)
+        value = float(df_stringency[column + 'raw'].tail(1))
+        # print(country, column, value)
         name, value, icon, colorB, colorT = limitations_translation(column, value)
         d['limitations'].append({
             'name': name,
@@ -217,6 +218,12 @@ def limitations_translation(column, value):
     # placeholder: https://github.com/iERP-ai/businesswithcovid-generator/issues/1#issue-597577465
     # Wait for further instructions.
 
+    # It's safer (rounding errors) to work with integers than floats,
+    # if they are to be used as dictionary keys.
+    # It would be better to use a string for each case,
+    # if there is a likelihood the hard coded scores will be adjusted in the future.
+    value = int(10 * value)
+
     d_names = {
         'S1': 'School closing',
         'S2': 'Workplace closing',
@@ -229,17 +236,63 @@ def limitations_translation(column, value):
         'S13': 'Contact tracing',
     }
 
-    '''
     d_values = {
-        'S1': { 10: 'All schools closed in whole country', 7.5: 'All schools recommended to be closed in whole country', 5: 'Schools closed in some regions', 2.5: 'Schools recommended to be closed in some regions', 0: 'All schools open' },
-        'S2': { 10: 'Workplaces require closing in whole country', 7.5: 'Workplaces recommended to be closed in whole country', 5: 'Workplaces require closing in some regions', 2.5: 'Workplaces recommended to be closed in some regions', 0: 'No restrictions on workplaces closing' },
-        'S3': { 10: 'Public events cancelled in whole country', 7.5: 'Public events recommended to be cancelled in whole country', 5: 'Public events cancelled in some regions', 2.5: 'Public events recommended to be cancelled in some regions', 0: 'No restrictions on Public events' },
-        'S4': { 10: 'Public transportation closed in whole country', 7.5: 'Public transportation recommended to be closed in whole country', 5: 'Public transportation closed in some regions', 2.5: 'Public transportation recommended to be closed in some regions', 0: 'No restrictions on Public transportation' },
-        'S5': { 10: 'COVID-19 public information campaign launched in whole country', 5: 'COVID-19 public information campaign launched in some regions', 0: 'No COVID-19 public information campaign launched' },
-        'S6': { 10: 'Restricted public movement in whole country', 7.5: 'Restricted public movement recommended in whole country', 5: 'Restricted public movement in some regions', 2.5: 'Restricted public movement recommended in some regions', 0: 'No restrictions on public movement' },
-        'S7': { 10: 'Travel ban on high-risk regions', 7: 'Quarantine on travel from high-risk regions', 3: 'Screening on travel from high-risk regions', 0: 'No travel controls' },
-        'S12': { 10: 'No testing policy on COVID-19', 7: 'Selective testing on COVID-19', 4: 'Testing of anyone showing COVID-19 symptoms', 2: 'Open public testing available' },
-        'S13': { 10: 'No contact tracing of COVID-19 infected individuals', 6: 'Limited contact tracing of COVID-19 infected individuals', 2: 'Comprehensive contact tracing of COVID-19 infected individuals for all cases' },
+    'S1': {
+        100: 'All schools closed in whole country',
+        75: 'All schools recommended to be closed in whole country',
+        50: 'Schools closed in some regions',
+        25: 'Schools recommended to be closed in some regions',
+        0: 'All schools open',
+        },
+    'S2': {
+        100: 'Workplaces require closing in whole country',
+        75: 'Workplaces recommended to be closed in whole country',
+        50: 'Workplaces require closing in some regions',
+        25: 'Workplaces recommended to be closed in some regions',
+        0: 'No restrictions on workplaces closing' },
+    'S3': {
+        100: 'Public events cancelled in whole country',
+        75: 'Public events recommended to be cancelled in whole country',
+        50: 'Public events cancelled in some regions',
+        25: 'Public events recommended to be cancelled in some regions',
+        0: 'No restrictions on Public events',
+        },
+    'S4': {
+        100: 'Public transportation closed in whole country',
+        75: 'Public transportation recommended to be closed in whole country',
+        50: 'Public transportation closed in some regions',
+        25: 'Public transportation recommended to be closed in some regions',
+        0: 'No restrictions on Public transportation',
+        },
+    'S5': {
+        100: 'COVID-19 public information campaign launched in whole country',
+        50: 'COVID-19 public information campaign launched in some regions',
+        0: 'No COVID-19 public information campaign launched',
+        },
+    'S6': {
+        100: 'Restricted public movement in whole country',
+        75: 'Restricted public movement recommended in whole country',
+        50: 'Restricted public movement in some regions',
+        25: 'Restricted public movement recommended in some regions',
+        0: 'No restrictions on public movement',
+        },
+    'S7': {
+        100: 'Travel ban on high-risk regions',
+        70: 'Quarantine on travel from high-risk regions',
+        30: 'Screening on travel from high-risk regions',
+        0: 'No travel controls',
+        },
+    'S12': {
+        100: 'No testing policy on COVID-19',
+        70: 'Selective testing on COVID-19',
+        40: 'Testing of anyone showing COVID-19 symptoms',
+        20: 'Open public testing available',
+        },
+    'S13': {
+        100: 'No contact tracing of COVID-19 infected individuals',
+        60: 'Limited contact tracing of COVID-19 infected individuals',
+        20: 'Comprehensive contact tracing of COVID-19 infected individuals for all cases',
+        },
     }
 
     d_icons = {
@@ -252,11 +305,11 @@ def limitations_translation(column, value):
         'S7': 'CarOutlined',
         'S12': 'Testing framework',
         'S13': 'ContactsOutlined',
-    } '''
+        }
 
     name = d_names[column]
-    value = value
-    icon = 'RocketOutlined'
+    value = d_values[column][value]
+    icon = d_icons[column]
     colorB = '#fff'
     colorT = '#000'
 
@@ -363,13 +416,14 @@ def calculate_iERPScoreB(df):
             not _.endswith('_Notes'),
             ))]
         func = functions[s]
-        df[s] = weights[s] * df.apply(
+        df[s + 'raw'] = df.apply(
             func,
             axis=1,  # apply function to each row
             args=args,
             )
+        df[s + 'weighted'] = weights[s] * df[s + 'raw']
 
-    df['iERPScoreB'] = df[weights.keys()].sum(axis=1) / 10
+    df['iERPScoreB'] = df[[_ + 'weighted' for _ in weights.keys()]].sum(axis=1) / 10
 
     return df
 
