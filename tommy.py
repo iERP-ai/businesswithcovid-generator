@@ -214,23 +214,6 @@ def merge_data_frames(df_confirmed, df_deaths, df_recovered):
     return df
 
 
-def merge_data_frames1(country, df_confirmed, df_deaths, df_recovered):
-
-    df_confirmed_sum = df_confirmed.groupby('Country/Region').sum().reset_index()
-    df_deaths_sum = df_deaths.groupby('Country/Region').sum().reset_index()
-    df_recovered_sum = df_recovered.groupby('Country/Region').sum().reset_index()
-    df = pd.concat([
-        df_confirmed_sum[df_confirmed_sum['Country/Region'] == country].drop(['Lat', 'Long', 'Country/Region'], axis=1).transpose(),
-        df_deaths_sum[df_deaths_sum['Country/Region'] == country].drop(['Lat', 'Long', 'Country/Region'], axis=1).transpose(),
-        df_recovered_sum[df_recovered_sum['Country/Region'] == country].drop(['Lat', 'Long', 'Country/Region'], axis=1).transpose(),
-        ], axis=1)
-    print(df_confirmed)
-    print(country)
-    df.columns = ['confirmed', 'deaths', 'recovered']
-
-    return df
-
-
 def prepare_country_dict(df_stringency):
 
     # Create a dictionary that points from both official and common name to alpha3 code.
