@@ -1,0 +1,68 @@
+{
+    "topCountriesImpacted": {
+        "Ukraine": 9.75,
+        "Pakistan": 9.7,
+        "Malaysia": 9.5,
+        "Venezuela": 9.35,
+        "Mexico": 9.345
+    },
+    "topCountriesByGDP": {
+        "USA": {
+            "iERPScoreB": 1.2,
+            "icon": "FallOutlined",
+            "color": "#444"
+        },
+        "CHN": {
+            "iERPScoreB": 2.54,
+            "icon": "FallOutlined",
+            "color": "#444"
+        },
+        "JPN": {
+            "iERPScoreB": 1.2,
+            "icon": "FallOutlined",
+            "color": "#444"
+        },
+        "DEU": {
+            "iERPScoreB": 4.7,
+            "icon": "FallOutlined",
+            "color": "#444"
+        },
+        "IND": {
+            "iERPScoreB": 9.290000000000001,
+            "icon": "MinusOutlined",
+            "color": "#000"
+        }
+    },
+    "map": {
+        "USA": {
+            "iERPScoreB": 1.2,
+            "cases": 429052,
+            "deaths": 14695,
+            "recoveries": 23559
+        },
+        "CHN": {
+            "iERPScoreB": 2.54,
+            "cases": 82809,
+            "deaths": 3337,
+            "recoveries": 77567
+        },
+        "JPN": {
+            "iERPScoreB": 1.2,
+            "cases": 4257,
+            "deaths": 93,
+            "recoveries": 622
+        },
+        "DEU": {
+            "iERPScoreB": 4.7,
+            "cases": 113296,
+            "deaths": 2349,
+            "recoveries": 46300
+        },
+        "IND": {
+            "iERPScoreB": 9.290000000000001,
+            "cases": 5916,
+            "deaths": 178,
+            "recoveries": 506
+        }
+    }
+}
