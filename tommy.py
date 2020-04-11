@@ -43,7 +43,7 @@ def main():
     df_recovered = pd.read_csv(url_recovered)
 
     print('reading', url_stringency, file=sys.stderr)
-    df_stringency = pd.read_csv(url_stringency).fillna(0)
+    df_stringency = pd.read_csv(url_stringency).fillna(method='ffill').fillna(0)
 
     # # Only include data older than today.
     intDateToday = int(datetime.today().strftime('%Y%m%d'))
@@ -181,7 +181,7 @@ def predict_logistic(values, dates):
     dateLatest = datetime.strptime(str(
         dates.tail(1).iat[0]), '%Y%m%d')
     valueLatest = values.tail(1).iat[0]
-    yield valueLatest, dateLatest
+    yield valueLatest, dateLatest.strftime('%Y-%m-%d')
 
     # Guess seeding values.
     guessMaximum = values.tail(1).iat[0] * 2
@@ -311,7 +311,7 @@ def predict_scores(scores, dates):
 
     # 4. if "val1" is more than 8 and "len1" is lower than 14 ->
     # today+1 - today+(14-"len1") = today's business score
-    elif val1 > 8 and len1 < 14:
+    elif val1 > 8 and len1 <= 14:
         predictions += append_predictions(dateLast, val1, 1, 14 - len1)
         # if "val2" is less than 7 -> today+(14-"len1") - today+21 = val2
         if val2 < 7:
@@ -336,7 +336,7 @@ def predict_scores(scores, dates):
         predictions += append_predictions(dateLast, 8.2, 5, 21)
 
     # 7.
-    elif val1 < val2 and len1 < 5:
+    elif val1 < val2 and len1 <= 5:
         predictions += append_predictions(dateLast, val1, 1, 4)
         predictions += append_predictions(dateLast, val1 * 0.8, 5, 21)
 
@@ -409,7 +409,7 @@ def do_json_per_country(country, alpha3, df_stringency):
         ):
         dateISO = datetime.strptime(str(Date), '%Y%m%d').strftime('%Y-%m-%d')
         d['graphs']['iERPScoreB']['history'].append(
-            {'d': dateISO, 'iERPScoreB': iERPScoreB})
+            {'d': dateISO, 'iERPScoreB': round(iERPScoreB, 3)})
         d['graphs']['cases']['history'].append(
             {'d': dateISO, 'cases': cases})
         d['graphs']['deaths']['history'].append(
