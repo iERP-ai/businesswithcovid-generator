@@ -35,14 +35,14 @@ def main():
         url_stringency,
         ) = tmp_download()
 
-    print('reading', url_confirmed, file=sys.stderr)
+    print('reading', url_confirmed)
     df_confirmed = pd.read_csv(url_confirmed)
-    print('reading', url_deaths, file=sys.stderr)
+    print('reading', url_deaths)
     df_deaths = pd.read_csv(url_deaths)
-    print('reading', url_recovered, file=sys.stderr)
+    print('reading', url_recovered)
     df_recovered = pd.read_csv(url_recovered)
 
-    print('reading', url_stringency, file=sys.stderr)
+    print('reading', url_stringency)
     df_stringency = pd.read_csv(url_stringency).fillna(method='ffill').fillna(0)
 
     # # Only include data older than today.
@@ -59,7 +59,7 @@ def main():
     df_stringency = df_stringency[
         df_stringency['Date'] <= max(intDateToday - 1, intDateCommon)]
 
-    print('calculating iERPScoreB', file=sys.stderr)
+    print('calculating iERPScoreB')
     calculate_iERPScoreB(df_stringency)
 
     d_name2alpha = prepare_country_dict(df_stringency)
@@ -80,14 +80,14 @@ def main():
     df_merged = merge_data_frames(
         df_confirmed, df_deaths, df_recovered)
 
-    print('creating json files for each country', file=sys.stderr)
+    print('creating json files for each country')
     do_json_across_countries(
         df_merged,
         df_stringency,
         d_alpha2name,
         )
 
-    print('creating json file across countries', file=sys.stderr, end='\n\n')
+    print('creating json file across countries')
     for country in df_confirmed['Country/Region'].unique():
         # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
@@ -95,7 +95,6 @@ def main():
         alpha3 = d_name2alpha[country]
         if alpha3 not in df_stringency['CountryCode'].unique():
             continue
-        print('country', country, file=sys.stderr)
         do_json_per_country(
             country,
             alpha3,
@@ -109,7 +108,7 @@ def main():
             fig.savefig('{}.png'.format(alpha3))
             fig.clf()
 
-    print('\nall done - happy days', file=sys.stderr)
+    print('\nall done - happy days')
 
     return
 
@@ -146,14 +145,14 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
                 icon = 'MinusOutlined'
                 color = '#000'
             d['topCountriesByGDP'][CountryCode] = {
-                'iERPScoreB': float(df.tail(1)['iERPScoreB']),
+                'iERPScoreB': round(float(df.tail(1)['iERPScoreB']),3),
                 'icon': icon,
                 'color': color,
                 }
 
         countryName = d_alpha2name[CountryCode]
         d['map'][CountryCode] = {
-            'iERPScoreB': round(float(df.tail(1)['iERPScoreB'], 3)),
+            'iERPScoreB': round(float(df.tail(1)['iERPScoreB']), 3),
             'cases': int(df_merged[countryName, 'confirmed'].tail(1)),
             'deaths': int(df_merged[countryName, 'deaths'].tail(1)),
             'recoveries': int(df_merged[countryName, 'recovered'].tail(1)),
@@ -196,8 +195,12 @@ def predict_logistic(values, dates):
             values,
             p0=p0,
             )
-        perr = np.sqrt(np.diag(pcov))
-        fitMaximum, fitSteepness, fitMidpoint = popt
+
+        if type(pcov) != float:
+            perr = np.sqrt(np.diag(pcov))
+            fitMaximum, fitSteepness, fitMidpoint = popt
+        else:
+            fitMaximum = 0
     except RuntimeError:
         fitMaximum = 0
 
@@ -516,10 +519,21 @@ def limitations_translation(column, value):
         'S13': 'ContactsOutlined',
         }
 
+    colorBGen = '#fff'
+    if (value>90): colorBGen='#fb9795'
+    elif (value>80): colorBGen='#fba2a1'
+    elif (value>70): colorBGen='#fcaeac'
+    elif (value>60): colorBGen='#fcb9b8'
+    elif (value>50): colorBGen='#fdc5c4'
+    elif (value>40): colorBGen='#fdd1d0'
+    elif (value>30): colorBGen='#fedcdc'
+    elif (value>20): colorBGen='#fee8e7'
+    elif (value>10): colorBGen='#fff3f3'
+
     name = d_names[column]
     value = d_values[column][value]
     icon = d_icons[column]
-    colorB = '#fff'
+    colorB = colorBGen
     colorT = '#000'
 
     return name, value, icon, colorB, colorT
