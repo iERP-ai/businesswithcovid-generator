@@ -153,7 +153,7 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
 
         countryName = d_alpha2name[CountryCode]
         d['map'][CountryCode] = {
-            'iERPScoreB': float(df.tail(1)['iERPScoreB']),
+            'iERPScoreB': round(float(df.tail(1)['iERPScoreB'], 3)),
             'cases': int(df_merged[countryName, 'confirmed'].tail(1)),
             'deaths': int(df_merged[countryName, 'deaths'].tail(1)),
             'recoveries': int(df_merged[countryName, 'recovered'].tail(1)),
@@ -374,7 +374,7 @@ def do_json_per_country(country, alpha3, df_stringency):
             'colorT': colorT,
             })
 
-    d['scores'] = {'iERPScoreBNow': float(df_stringency['iERPScoreB'].tail(1))}
+    d['scores'] = {'iERPScoreBNow': round(float(df_stringency['iERPScoreB'].tail(1)), 3)}
 
     d['graphs'] = {
         'iERPScoreB': {'history': [], 'forecast': []},
