@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import pandas as pd
-import pycountry
-import iso3166
-import json
-from datetime import datetime
-from datetime import timedelta
+
+# built-in
 import itertools
 import operator
+import sys
+from datetime import datetime
+from datetime import timedelta
+import json
+
+# not built-in
+import pandas as pd
+from scipy.optimize import curve_fit
+import numpy as np
+
+import pycountry
+import iso3166
 
 
 def main():
@@ -27,14 +35,14 @@ def main():
         url_stringency,
         ) = tmp_download()
 
-    print('reading', url_confirmed)
+    print('reading', url_confirmed, file=sys.stderr)
     df_confirmed = pd.read_csv(url_confirmed)
-    print('reading', url_deaths)
+    print('reading', url_deaths, file=sys.stderr)
     df_deaths = pd.read_csv(url_deaths)
-    print('reading', url_recovered)
+    print('reading', url_recovered, file=sys.stderr)
     df_recovered = pd.read_csv(url_recovered)
 
-    print('reading', url_stringency)
+    print('reading', url_stringency, file=sys.stderr)
     df_stringency = pd.read_csv(url_stringency).fillna(0)
 
     # # Only include data older than today.
@@ -51,7 +59,7 @@ def main():
     df_stringency = df_stringency[
         df_stringency['Date'] <= max(intDateToday - 1, intDateCommon)]
 
-    print('calculating iERPScoreB')
+    print('calculating iERPScoreB', file=sys.stderr)
     calculate_iERPScoreB(df_stringency)
 
     d_name2alpha = prepare_country_dict(df_stringency)
@@ -72,14 +80,14 @@ def main():
     df_merged = merge_data_frames(
         df_confirmed, df_deaths, df_recovered)
 
-    print('creating json files for each country')
+    print('creating json files for each country', file=sys.stderr)
     do_json_across_countries(
         df_merged,
         df_stringency,
         d_alpha2name,
         )
 
-    print('creating json file across countries')
+    print('creating json file across countries', file=sys.stderr, end='\n\n')
     for country in df_confirmed['Country/Region'].unique():
         # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
@@ -87,13 +95,21 @@ def main():
         alpha3 = d_name2alpha[country]
         if alpha3 not in df_stringency['CountryCode'].unique():
             continue
+        print('country', country, file=sys.stderr)
         do_json_per_country(
             country,
             alpha3,
             df_stringency[df_stringency['CountryCode'] == alpha3],
             )
+        bool_figure = True
+        if bool_figure is True:
+            s = df_stringency[df_stringency['CountryCode'] == alpha3]['iERPScoreB']
+            ax = s.plot.line()
+            fig = ax.get_figure()
+            fig.savefig('{}.png'.format(alpha3))
+            fig.clf()
 
-    print('all done - happy days')
+    print('\nall done - happy days', file=sys.stderr)
 
     return
 
@@ -149,7 +165,61 @@ def do_json_across_countries(df_merged, df_stringency, d_alpha2name):
     return
 
 
-def predict_cases(cases, dates):
+def logistic(x, a, b, c):
+
+    # a is maximum
+    # b is steepness/inclination
+    # c is midpoint
+
+    y = a / (1 + np.exp(-b * (x - c)))
+
+    return y
+
+
+def predict_logistic(values, dates):
+
+    dateLatest = datetime.strptime(str(
+        dates.tail(1).iat[0]), '%Y%m%d')
+    valueLatest = values.tail(1).iat[0]
+    yield valueLatest, dateLatest
+
+    # Guess seeding values.
+    guessMaximum = values.tail(1).iat[0] * 2
+    guessSteepness = 0.25
+    guessMidpoint = len(values)
+    p0 = [guessMaximum, guessSteepness, guessMidpoint]
+
+    try:
+        popt, pcov = curve_fit(
+            logistic,
+            range(len(values)),
+            values,
+            p0=p0,
+            )
+        perr = np.sqrt(np.diag(pcov))
+        fitMaximum, fitSteepness, fitMidpoint = popt
+    except RuntimeError:
+        fitMaximum = 0
+
+    # Revert to linear fit, if fit to logistic function fails.
+    if fitMaximum < valueLatest:
+        for valuePredicted, dateISO in predict_linear(values, dates):
+            yield valuePredicted, dateISO
+        return
+
+    # Get fitted values 3 weeks into the future.
+    for days in range(1, 21 + 1):
+        dateISO = operator.add(
+            dateLatest,
+            timedelta(days=days),
+            ).strftime('%Y-%m-%d')
+        valuePredicted = logistic(len(values) + days, *popt)
+        yield valuePredicted, dateISO
+
+    return
+
+
+def predict_linear(cases, dates):
     s = pd.Series(cases)
 
     change = s.pct_change(periods=3).tail(1).iat[0]
@@ -323,12 +393,13 @@ def do_json_per_country(country, alpha3, df_stringency):
         if i in (7, 14, 21):
             d['scores']['iERPScoreBDays{}'.format(i)] = round(scorePredicted, 3)
 
-    for cases, dateISO in predict_cases(
-        df_stringency['ConfirmedCases'][-4:],
-        df_stringency['Date'][-4:],
-        ):
-        d['graphs']['cases']['forecast'].append(
-            {'d': dateISO, 'cases': int(cases)})
+    for k1, k2 in (('ConfirmedCases', 'cases'), ('ConfirmedDeaths', 'deaths')):
+        for valuePredicted, dateISO in predict_logistic(
+            df_stringency[k1],
+            df_stringency['Date'],
+            ):
+            d['graphs'][k2]['forecast'].append(
+                {'d': dateISO, k2: int(valuePredicted)})
 
     for Date, iERPScoreB, cases, deaths in zip(
         df_stringency['Date'],
