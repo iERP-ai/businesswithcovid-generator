@@ -88,19 +88,28 @@ def main():
         )
 
     print('creating json file across countries')
+
+    # Pregenerate unique country codes
+    uniqueCC = df_stringency['CountryCode'].unique()
+
     for country in df_confirmed['Country/Region'].unique():
+
         # Skip cruise line ships.
         if country in ('Diamond Princess', 'MS Zaandam'):
             continue
         alpha3 = d_name2alpha[country]
-        if alpha3 not in df_stringency['CountryCode'].unique():
+
+        if alpha3 not in uniqueCC:
+            print ('Not found in Oxford', country, alpha3)
             continue
+
         do_json_per_country(
             country,
             alpha3,
             df_stringency[df_stringency['CountryCode'] == alpha3],
             )
-        bool_figure = True
+        
+        bool_figure = False
         if bool_figure is True:
             s = df_stringency[df_stringency['CountryCode'] == alpha3]['iERPScoreB']
             ax = s.plot.line()
@@ -239,7 +248,6 @@ def predict_linear(cases, dates):
                 timedelta(days=x),
                 ).strftime('%Y-%m-%d')
             predictions.append([lastValue, dateISO])
-            lastDate = lastDate + 1
 
     else:
         for x in range(0, 21):
@@ -259,10 +267,10 @@ def append_predictions(dateLast, value, deltaDays1, deltaDays2):
 
     predictions = []
 
-    for days in range(deltaDays1, deltaDays2 + 1):
+    for x in range(deltaDays1, deltaDays2 + 1):
         dateISO = operator.add(
             dateLast,
-            timedelta(days=days),
+            timedelta(days=x),
             ).strftime('%Y-%m-%d')
         predictions.append([value, dateISO])
 
